@@ -2,9 +2,4 @@
 
 - **Chosen Solution:** list of sets
 - **Chosen Tweak:** swapping a random set with one not present in the solution
-- **Stopping Method:** a `step` variable is incremented only if the state produced by the tweak is either illegal or has a smaller fitness compared to the previous solution
-
-
-
-
-
+- **Stopping Method:** a `step` variable is incremented only if the state produced by the tweak is either illegal or has a smaller fitness compared to the previous solution, and is used as a stop criterion
