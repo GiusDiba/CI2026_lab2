@@ -56,6 +56,7 @@ while step < MAX_STEPS:
     if isValid(new_solution) and fitness(new_solution) > fitness(solution):
         solution = new_solution.copy()
         available_sets = new_sets.copy()
+        step = 0
     else:
         step += 1
 
