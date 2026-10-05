@@ -22,6 +22,8 @@ available_sets = [s for s in SETS if s not in solution]
 ic(available_sets)
 
 def fitness(solution: list[frozenset]) -> float:
+    if len(solution) == 0:
+        return -sum(COSTS) - 1
     return -sum(XCOSTS[s] for s in solution)
 
 # Tweak: random removal, adding or swap of a set
@@ -37,17 +39,20 @@ def remove_random_set(solution: list[frozenset], sets: list[frozenset]):
     return solution, sets
 
 def add_random_set(solution: list[frozenset], sets: list[frozenset]):
-    rand_sets_idx = randint(0, len(sets) - 1)
-    chosen = sets.pop(rand_sets_idx)
-    solution.append(chosen)
+    sets_len = len(sets)
+    if sets_len != 0:
+        rand_sets_idx = randint(0, len(sets) - 1)
+        chosen = sets.pop(rand_sets_idx)
+        solution.append(chosen)
 
     return solution, sets
 
 def swap_random_set(solution: list[frozenset], sets: list[frozenset]):
     sol_len = len(solution)
-    if sol_len != 0:
+    sets_len = len(sets)
+    if sol_len != 0 and sets_len != 0:
         rand_sol_idx = randint(0, sol_len - 1)
-        rand_sets_idx = randint(0, len(sets) - 1)
+        rand_sets_idx = randint(0, sets_len - 1)
 
         removed = solution.pop(rand_sol_idx)
         chosen = sets.pop(rand_sets_idx)
