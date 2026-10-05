@@ -12,12 +12,12 @@ COSTS = tuple(10*random() + (s + random()) ** 2 for s in range(N) )
 
 ic(SETS, COSTS)
 
-# Solution as a list of sets
 XCOSTS = {SETS[i]: COSTS[i] for i in range(N)}
 
 def isValid(solution: list[frozenset]) -> bool:
     return frozenset().union(*solution) == frozenset(range(N))
 
+# Solution as a list of sets
 solution = []
 while not isValid(solution):
     solution = sample(SETS, randint(0, N))
