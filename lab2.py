@@ -24,24 +24,59 @@ ic(available_sets)
 def fitness(solution: list[frozenset]) -> list[frozenset]:
     return -sum(XCOSTS[s] for s in solution)
 
-# Tweak: swapping a set from the solution with one from the remaining available sets
-def tweak(solution: list[frozenset], sets: list[frozenset]):
-    rand_sol_idx = randint(0, SOL_SIZE - 1)
-    rand_sets_idx = randint(0, len(sets) - 1)
+# Tweak: random removal, adding or swap of a set
 
+# Possible operations
+def remove_random_set(solution: list[frozenset], sets: list[frozenset]):
+    sol_len = len(solution)
+    if sol_len != 0:
+        rand_sol_idx = randint(0, sol_len - 1)
+        removed = solution.pop(rand_sol_idx)
+        sets.append(removed)
+
+    return solution, sets
+
+def add_random_set(solution: list[frozenset], sets: list[frozenset]):
+    rand_sets_idx = randint(0, len(sets) - 1)
+    chosen = sets.pop(rand_sets_idx)
+    solution.append(chosen)
+
+    return solution, sets
+
+def swap_random_set(solution: list[frozenset], sets: list[frozenset]):
+    sol_len = len(solution)
+    if sol_len != 0:
+        rand_sol_idx = randint(0, sol_len - 1)
+        rand_sets_idx = randint(0, len(sets) - 1)
+
+        removed = solution.pop(rand_sol_idx)
+        chosen = sets.pop(rand_sets_idx)
+
+        solution.append(chosen)
+        sets.append(removed)
+
+    return solution, sets
+
+op_map = {
+    0: remove_random_set,
+    1: add_random_set,
+    2: swap_random_set
+}
+
+# Tweak
+def tweak(solution: list[frozenset], sets: list[frozenset]):
     new_sol = solution.copy()
     new_available_sets = sets.copy()
 
-    removed = new_sol.pop(rand_sol_idx)
-    chosen = new_available_sets.pop(rand_sets_idx)
-
-    new_sol.append(chosen)
-    new_available_sets.append(removed)
-
+    while random() < 0.8:
+        operation = randint(0, 2)
+        new_sol, new_available_sets = op_map[operation](new_sol, new_available_sets)
+    
     return new_sol, new_available_sets
+        
 
 def isValid(solution: list[frozenset]) -> bool:
-    return frozenset.union(*solution) == frozenset(range(N))
+    return frozenset().union(*solution) == frozenset(range(N))
 
 # Hill Climber
 print("INITIAL SOLUTION:")
