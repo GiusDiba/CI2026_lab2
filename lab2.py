@@ -21,7 +21,7 @@ solution = sample(SETS, k = SOL_SIZE)
 available_sets = [s for s in SETS if s not in solution]
 ic(available_sets)
 
-def fitness(solution: list[frozenset]) -> list[frozenset]:
+def fitness(solution: list[frozenset]) -> float:
     return -sum(XCOSTS[s] for s in solution)
 
 # Tweak: random removal, adding or swap of a set
