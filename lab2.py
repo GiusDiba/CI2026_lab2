@@ -10,15 +10,18 @@ OBJECTS = {n for n in range(N)}
 SETS = tuple(frozenset(sample(range(N), k = s + 1)) for s in range(N))
 COSTS = tuple(10*random() + (s + random()) ** 2 for s in range(N) )
 
-print(SETS)
-print(COSTS)
+ic(SETS, COSTS)
 
 # Solution as a list of sets
 XCOSTS = {SETS[i]: COSTS[i] for i in range(N)}
-SOL_SIZE = 5
 
-solution = sample(SETS, k = SOL_SIZE)
-available_sets = [s for s in SETS if s not in solution]
+def isValid(solution: list[frozenset]) -> bool:
+    return frozenset().union(*solution) == frozenset(range(N))
+
+solution = []
+while not isValid(solution):
+    solution = sample(SETS, randint(0, N))
+    available_sets = [s for s in SETS if s not in solution]
 ic(available_sets)
 
 def fitness(solution: list[frozenset]) -> float:
@@ -78,10 +81,6 @@ def tweak(solution: list[frozenset], sets: list[frozenset]):
         new_sol, new_available_sets = op_map[operation](new_sol, new_available_sets)
     
     return new_sol, new_available_sets
-        
-
-def isValid(solution: list[frozenset]) -> bool:
-    return frozenset().union(*solution) == frozenset(range(N))
 
 # Hill Climber
 print("INITIAL SOLUTION:")
