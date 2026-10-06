@@ -1,6 +1,7 @@
 
 from random import seed, random, sample, randint
-from collections.abc import Sequence
+from matplotlib import pyplot as plt
+from itertools import accumulate
 from icecream import ic
 
 N = 10
@@ -88,10 +89,12 @@ ic(solution, fitness(solution))
 
 MAX_STEPS = 255
 
+history = [fitness(solution)]
 step = 0
 while step < MAX_STEPS:
     new_solution, new_sets = tweak(solution, available_sets)
 
+    history.append(fitness(solution))
     if isValid(new_solution) and fitness(new_solution) > fitness(solution):
         solution = new_solution.copy()
         available_sets = new_sets.copy()
@@ -101,3 +104,13 @@ while step < MAX_STEPS:
 
 print("\nFINAL SOLUTION:")
 ic(solution, fitness(solution))
+
+plt.figure(figsize = (14, 8))
+plt.plot(
+    range(len(history)),
+    list(accumulate(history, max)),
+    color = "red"
+)
+
+_ = plt.scatter(range(len(history)), history, marker = ".")
+plt.show()
