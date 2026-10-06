@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from itertools import accumulate
 from icecream import ic
 
-N = 10
+N = 100
 seed(42)
 
 OBJECTS = {n for n in range(N)}
@@ -94,7 +94,7 @@ step = 0
 while step < MAX_STEPS:
     new_solution, new_sets = tweak(solution, available_sets)
 
-    history.append(fitness(solution))
+    history.append(fitness(new_solution))
     if isValid(new_solution) and fitness(new_solution) > fitness(solution):
         solution = new_solution.copy()
         available_sets = new_sets.copy()
