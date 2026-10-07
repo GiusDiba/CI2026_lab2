@@ -4,31 +4,27 @@ from matplotlib import pyplot as plt
 from itertools import accumulate
 from icecream import ic
 
-N = 100
+SETS_AMT = 1000
 seed(42)
 
-OBJECTS = {n for n in range(N)}
-SETS = tuple(frozenset(sample(range(N), k = s + 1)) for s in range(N))
-COSTS = tuple(10*random() + (s + random()) ** 2 for s in range(N) )
+OBJECTS = frozenset(range(SETS_AMT))
+SETS = tuple(frozenset(sample(range(SETS_AMT), k = s + 1)) for s in range(SETS_AMT))
+COSTS = tuple(10*random() + (s + random()) ** 2 for s in range(SETS_AMT) )
 
-ic(SETS, COSTS)
-
-XCOSTS = {SETS[i]: COSTS[i] for i in range(N)}
-
-def isValid(solution: list[frozenset]) -> bool:
-    return frozenset().union(*solution) == frozenset(range(N))
+XCOSTS = {SETS[i]: COSTS[i] for i in range(SETS_AMT)}
+COSTS_SUM = sum(COSTS)
 
 # Solution as a list of sets
-solution = []
-while not isValid(solution):
-    solution = sample(SETS, randint(0, N))
-    available_sets = [s for s in SETS if s not in solution]
-ic(available_sets)
+solution = [] # sample(SETS, randint(0, SETS_AMT))
+available_sets = [s for s in SETS if s not in solution]
 
+
+# Negative fitness for illegal states, positive fitness for legal states
 def fitness(solution: list[frozenset]) -> float:
-    if len(solution) == 0:
-        return -sum(COSTS) - 1
-    return -sum(XCOSTS[s] for s in solution)
+    covered = frozenset().union(*solution)
+    if covered != OBJECTS:
+        return len(covered) / SETS_AMT - 1
+    return 1 - sum(XCOSTS[s] for s in solution) / COSTS_SUM
 
 # Tweak: random removal, adding or swap of a set
 
@@ -84,19 +80,22 @@ def tweak(solution: list[frozenset], sets: list[frozenset]):
     return new_sol, new_available_sets
 
 # Hill Climber
-print("INITIAL SOLUTION:")
-ic(solution, fitness(solution))
+current_fitness = fitness(solution)
+print("INITIAL SOLUTION'S FITNESS:")
+ic(fitness(solution))
 
 MAX_STEPS = 255
 
-history = [fitness(solution)]
+history = [current_fitness]
 step = 0
 while step < MAX_STEPS:
     new_solution, new_sets = tweak(solution, available_sets)
+    new_fitness = fitness(new_solution)
 
     history.append(fitness(new_solution))
-    if isValid(new_solution) and fitness(new_solution) > fitness(solution):
+    if new_fitness > current_fitness:
         solution = new_solution.copy()
+        current_fitness = fitness(solution)
         available_sets = new_sets.copy()
         step = 0
     else:
