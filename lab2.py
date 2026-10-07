@@ -1,7 +1,7 @@
-
 from random import seed, random, sample, randint
 from matplotlib import pyplot as plt
 from itertools import accumulate
+from math import ceil
 from icecream import ic
 
 SETS_AMT = 1000
@@ -12,7 +12,7 @@ SETS = tuple(frozenset(sample(range(SETS_AMT), k = s + 1)) for s in range(SETS_A
 COSTS = tuple(10*random() + (s + random()) ** 2 for s in range(SETS_AMT) )
 
 XCOSTS = {SETS[i]: COSTS[i] for i in range(SETS_AMT)}
-COSTS_SUM = sum(COSTS)
+REF_COST = COSTS[-1]
 
 # Solution as a list of sets
 solution = [] # sample(SETS, randint(0, SETS_AMT))
@@ -24,9 +24,9 @@ def fitness(solution: list[frozenset]) -> float:
     covered = frozenset().union(*solution)
     if covered != OBJECTS:
         return len(covered) / SETS_AMT - 1
-    return 1 - sum(XCOSTS[s] for s in solution) / COSTS_SUM
+    return 1 / (1 + sum(XCOSTS[s] for s in solution) / REF_COST)
 
-# Tweak: random removal, adding or swap of a set
+# Tweak: removal, adding or swap of a set
 
 # Possible operations
 def remove_random_set(solution: list[frozenset], sets: list[frozenset]):
@@ -63,20 +63,39 @@ def swap_random_set(solution: list[frozenset], sets: list[frozenset]):
     return solution, sets
 
 op_map = {
-    0: remove_random_set,
-    1: add_random_set,
+    0: add_random_set,
+    1: remove_random_set,
     2: swap_random_set
 }
 
 # Tweak
-def tweak(solution: list[frozenset], sets: list[frozenset]):
+    # More operations are performed if the fitness is low (exploration)
+    # Less operation are performed if the fitness is high (exploitation)
+    # The fitness can range between -1 and 1, so the following arbitrary criterion has been chosen:
+    #   [WIP]
+
+def tweak(solution: list[frozenset], sets: list[frozenset], current_fitness: float):
     new_sol = solution.copy()
     new_available_sets = sets.copy()
 
-    while random() < 0.8:
-        operation = randint(0, 2)
+    min_op = 1
+    max_op = 2
+
+    if current_fitness < 0:
+        operations_amt = -current_fitness * SETS_AMT / 2
+        min_op = 0
+        max_op = 0
+    elif current_fitness <= 0.2:
+        operations_amt = 3
+    else:
+        operations_amt = 2 * ceil(1 - current_fitness)
+
+    idx = 0
+    while idx < operations_amt:
+        operation = randint(min_op, max_op)
         new_sol, new_available_sets = op_map[operation](new_sol, new_available_sets)
-    
+        idx += 1
+
     return new_sol, new_available_sets
 
 # Hill Climber
@@ -89,7 +108,7 @@ MAX_STEPS = 255
 history = [current_fitness]
 step = 0
 while step < MAX_STEPS:
-    new_solution, new_sets = tweak(solution, available_sets)
+    new_solution, new_sets = tweak(solution, available_sets, current_fitness)
     new_fitness = fitness(new_solution)
 
     history.append(new_fitness)
