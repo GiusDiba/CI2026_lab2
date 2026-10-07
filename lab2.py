@@ -92,14 +92,18 @@ while step < MAX_STEPS:
     new_solution, new_sets = tweak(solution, available_sets)
     new_fitness = fitness(new_solution)
 
-    history.append(fitness(new_solution))
-    if new_fitness > current_fitness:
-        solution = new_solution.copy()
-        current_fitness = fitness(solution)
-        available_sets = new_sets.copy()
-        step = 0
-    else:
+    history.append(new_fitness)
+    if new_fitness < current_fitness:
         step += 1
+    else:
+        if new_fitness == current_fitness:
+            step += 1
+        else:
+            step = 0
+        
+        solution = new_solution    
+        current_fitness = new_fitness     
+        available_sets = new_sets
 
 print("\nFINAL SOLUTION:")
 ic(solution, fitness(solution))
